@@ -158,6 +158,7 @@ module Semian
       ENV['SEMIAN_CIRCUIT_BREAKER_DISABLED'] || ENV['SEMIAN_DISABLED']
     end
 
+    # TODO Brendan: How to use this when calling acquire without a block
     def maybe_with_half_open_resource_timeout(resource, &block)
       result =
         if half_open? && @half_open_resource_timeout && resource.respond_to?(:with_resource_timeout)

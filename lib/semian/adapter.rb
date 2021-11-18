@@ -6,7 +6,7 @@ module Semian
       raise NotImplementedError.new("Semian adapters must implement a `semian_identifier` method")
     end
 
-    # TODO Brendan: Not thread safe
+    # TODO Brendan: Not thread safe?
     def semian_resource
       @semian_resource ||= case semian_options
       when false

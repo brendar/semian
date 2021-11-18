@@ -223,13 +223,14 @@ module Semian
   end
 
   # Retrieves a hash of all registered resources.
-  # TODO Brendan: Not thread safe
   def resources
+    # TODO Brendan: Not thread safe
     @resources ||= LRUHash.new
   end
 
   # Retrieves a hash of all registered resource consumers.
   def consumers
+    # TODO Brendan: Not thread safe
     @consumers ||= {}
   end
 

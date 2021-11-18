@@ -31,6 +31,7 @@ module Semian
         end
       else
         if @bulkhead
+          # TODO Brendan: Support this?
           raise "Bulkhead currently does not support acquire without a block"
         end
         acquire_circuit_breaker(scope, adapter, resource)
