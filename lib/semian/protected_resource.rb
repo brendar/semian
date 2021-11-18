@@ -45,10 +45,14 @@ module Semian
 
     def acquire_circuit_breaker(scope, adapter, resource)
       if @circuit_breaker.nil?
-        yield self
+        yield self if block_given?
       else
-        @circuit_breaker.acquire(resource) do
-          yield self
+        if block_given?
+          @circuit_breaker.acquire(resource) do
+            yield self
+          end
+        else
+          @circuit_breaker.acquire(resource)
         end
       end
     rescue ::Semian::OpenCircuitError
