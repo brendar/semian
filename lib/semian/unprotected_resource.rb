@@ -22,7 +22,9 @@ module Semian
     end
 
     def acquire(*)
-      yield self
+      if block_given?
+        yield self
+      end
     end
 
     def count
@@ -50,6 +52,9 @@ module Semian
 
     def request_allowed?
       true
+    end
+
+    def notice_error(_error)
     end
 
     def mark_failed(_error)

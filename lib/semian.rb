@@ -167,6 +167,7 @@ module Semian
     resources[name] = ProtectedResource.new(name, bulkhead, circuit_breaker)
   end
 
+  # TODO Brendan: Not thread safe
   def retrieve_or_register(name, **args)
     # If consumer who retrieved / registered by a Semian::Adapter, keep track
     # of who the consumer was so that we can clear the resource reference if needed.
@@ -222,6 +223,7 @@ module Semian
   end
 
   # Retrieves a hash of all registered resources.
+  # TODO Brendan: Not thread safe
   def resources
     @resources ||= LRUHash.new
   end

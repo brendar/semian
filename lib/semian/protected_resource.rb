@@ -3,7 +3,7 @@ module Semian
     extend Forwardable
 
     def_delegators :@bulkhead, :destroy, :count, :semid, :tickets, :registered_workers
-    def_delegators :@circuit_breaker, :reset, :mark_failed, :mark_success, :request_allowed?,
+    def_delegators :@circuit_breaker, :reset, :notice_error, :mark_failed, :mark_success, :request_allowed?,
                    :open?, :closed?, :half_open?
 
     attr_reader :bulkhead, :circuit_breaker, :name
@@ -22,11 +22,18 @@ module Semian
     end
 
     def acquire(timeout: nil, scope: nil, adapter: nil, resource: nil)
-      acquire_circuit_breaker(scope, adapter, resource) do
-        acquire_bulkhead(timeout, scope, adapter) do |_, wait_time|
-          Semian.notify(:success, self, scope, adapter, wait_time)
-          yield self
+      if block_given?
+        acquire_circuit_breaker(scope, adapter, resource) do
+          acquire_bulkhead(timeout, scope, adapter) do |_, wait_time|
+            Semian.notify(:success, self, scope, adapter, wait_time)
+            yield self
+          end
         end
+      else
+        if @bulkhead
+          raise "Bulkhead currently does not support acquire without a block"
+        end
+        acquire_circuit_breaker(scope, adapter, resource)
       end
     end
 

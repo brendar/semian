@@ -28,18 +28,25 @@ module Semian
 
       raise OpenCircuitError unless request_allowed?
 
-      result = nil
-      begin
-        result = maybe_with_half_open_resource_timeout(resource, &block)
-      rescue *@exceptions => error
+      if block
+        result = nil
+        begin
+          result = maybe_with_half_open_resource_timeout(resource, &block)
+        rescue => error
+          notice_error(error)
+          raise error
+        end
+        mark_success
+        result
+      end
+    end
+
+    def notice_error(error)
+      if @exceptions.any? { |err_class| error.is_a?(err_class) }
         if !error.respond_to?(:marks_semian_circuits?) || error.marks_semian_circuits?
           mark_failed(error)
         end
-        raise error
-      else
-        mark_success
       end
-      result
     end
 
     def transition_to_half_open?

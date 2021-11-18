@@ -6,6 +6,7 @@ module Semian
       raise NotImplementedError.new("Semian adapters must implement a `semian_identifier` method")
     end
 
+    # TODO Brendan: Not thread safe
     def semian_resource
       @semian_resource ||= case semian_options
       when false
@@ -30,9 +31,15 @@ module Semian
     private
 
     def acquire_semian_resource(scope:, adapter:, &block)
-      return yield if resource_already_acquired?
-      semian_resource.acquire(scope: scope, adapter: adapter, resource: self) do
-        mark_resource_as_acquired(&block)
+      if block
+        return yield if resource_already_acquired? # TODO Brendan: Not thread safe
+        semian_resource.acquire(scope: scope, adapter: adapter, resource: self) do
+          mark_resource_as_acquired(&block)
+        end
+      else
+        # TODO Brendan: How to handle resource_already_acquired? / mark_resource_as_acquired
+        semian_resource.acquire(scope: scope, adapter: adapter, resource: self)
+        semian_resource
       end
     rescue ::Semian::OpenCircuitError => error
       last_error = semian_resource.circuit_breaker.last_error
@@ -64,6 +71,7 @@ module Semian
       @resource_acquired
     end
 
+    # TODO Brendan: Not thread safe
     def mark_resource_as_acquired
       previous = @resource_acquired
       @resource_acquired = true
